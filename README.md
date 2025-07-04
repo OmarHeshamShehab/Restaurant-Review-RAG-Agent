@@ -1,88 +1,86 @@
-# 🍕 Local AI RAG-Powered Restaurant Q&A Agent
+# 🍕 Pizza Restaurant Review QA System
 
-A lightweight, local-first AI agent that uses Retrieval-Augmented Generation (RAG) to intelligently answer user questions about a pizza restaurant based on realistic customer reviews.
-
-## ✨ Features
-
-- 🔍 **RAG-based Question Answering**: Combines LLM generation with context-retrieved restaurant reviews.
-- 🧠 **LLM-Powered**: Runs on [Ollama](https://ollama.ai) with support for models like LLaMA 3.
-- 🗃️ **Vector Search**: Uses vector embeddings to semantically retrieve the most relevant reviews.
-- 🔌 **Offline-Ready**: All components can run locally—no need for cloud APIs.
-- 🧪 **Interactive Shell**: Ask any question, get smart answers backed by real reviews.
+An interactive question-answering app that uses **LangChain**, **Ollama's LLaMA 3.2**, and **Chroma vector search** to answer questions based on real pizza restaurant reviews.
 
 ---
 
-## 🚀 Getting Started
+## ✅ Features
+- Parses real reviews and creates vector embeddings using `mxbai-embed-large`
+- Retrieves the top 5 relevant reviews for each question
+- Uses LLaMA 3.2 to answer questions contextually
+- Reuses a persistent local vector store to speed up future runs
 
-### 📦 Requirements
+---
 
-Install dependencies from `requirements.txt`:
-
-```bash
-pip install -r requirements.txt
+## 📂 File Structure
+```
+.
+├── main.py                      # Runs the QA loop with LangChain + LLaMA 3.2
+├── vector.py                    # Loads CSV, embeds reviews, builds Chroma vector DB
+├── realistic_restaurant_reviews.csv  # Dataset with Title, Review, Rating, Date
+├── chrome_langchain_db/         # (Auto-created) Vector store for embeddings
 ```
 
-Ensure you have `ollama` installed and a supported model (e.g., `llama3`) pulled locally:
+---
+
+## ⚙️ Requirements
+
+- Python 3.8+
+- [Ollama](https://ollama.com/) installed and running locally
+
+### Install Python packages:
 
 ```bash
-ollama pull llama3
+pip install pandas langchain langchain-core langchain-community langchain-chroma langchain-ollama
 ```
 
-### ▶️ Running the Agent
+### Pull required Ollama models:
+
+```bash
+ollama pull llama3.2
+ollama pull mxbai-embed-large
+```
+
+---
+
+## 🚀 How to Run
 
 ```bash
 python main.py
 ```
 
-You'll be prompted to ask a question. Type `q` to quit the session.
+Then ask a question like:
+
+- "What do people think about the crust?"
+- "Is the pizza overpriced?"
+- "How’s the atmosphere?"
+- "Are the staff friendly?"
+
+Type `q` to quit.
 
 ---
 
-## 🧩 Project Structure
+## 🗃 Dataset
 
-```bash
-.
-├── main.py                  # Core logic: combines retrieval and generation
-├── vector.py                # Vector retriever and document loading
-├── realistic_restaurant_reviews.csv  # Source data for retrieval
-├── requirements.txt         # Python dependencies
-└── README.md                # Project overview
-```
+`realistic_restaurant_reviews.csv` must contain:
+- `Title`: Short title of the review
+- `Review`: Full review text
+- `Rating`: Numerical rating
+- `Date`: Date of the review
 
 ---
 
 ## 🧠 How It Works
 
-1. **Load Reviews**: Parses a CSV of realistic restaurant reviews.
-2. **Embed Documents**: Converts them into semantic vectors using a local embedding model.
-3. **Retrieve**: Finds the most relevant reviews based on user input.
-4. **Prompt**: Formats retrieved reviews and the question into a prompt template.
-5. **Generate**: Uses a local LLM (via LangChain + Ollama) to answer based on the retrieved context.
-
-### Prompt Template Example:
-
-```
-You are an expert in answering questions about a pizza restaurant.
-
-Here are some relevant reviews: {reviews}
-
-Here is the question to answer: {question}
-```
+1. `vector.py` loads the CSV and generates vector embeddings for each review using `mxbai-embed-large`
+2. Stores them in a persistent Chroma vector DB
+3. `main.py` takes your question, finds top 5 relevant reviews, and prompts LLaMA 3.2 for an answer
 
 ---
 
-## 📊 Example Questions
+## 📌 Notes
 
-- "What do customers say about the crust?"
-- "Are there complaints about service?"
-- "What dishes are most popular?"
+- The first run creates the vector database in `chrome_langchain_db`
+- Future runs reuse this to avoid re-embedding
+- Answers are entirely based on the retrieved review context
 
----
-
-## 🛠️ Dependencies
-
-- `langchain`
-- `langchain_ollama`
-- `pandas`
-- `faiss-cpu` or another vector database backend
-- `openai` (if using any fallback embedding models)
